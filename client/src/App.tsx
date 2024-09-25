@@ -9,6 +9,8 @@ interface MessageTypes {
 const App = () => {
   const socket = useMemo(() => io("http://localhost:3000"), []);
 
+  const [userId, setUserId] = useState("");
+
   // Store messages in state instead of ref
   const [messages, setMessages] = useState<MessageTypes[]>([]);
   const [message, setMessage] = useState("");
@@ -40,17 +42,31 @@ const App = () => {
       console.log(msg);
     });
 
+    userId &&
+      socket.on("receive-message", (userId: string, message: string) => {
+        console.log(userId, message);
+      });
+
     // Cleanup: Remove listeners when the component unmounts
     return () => {
       socket.off("messageReceiver");
       socket.off("connect");
       socket.off("greet");
       socket.off("user");
+      socket.off("receive-message");
+      socket.disconnect();
     };
   }, [socket]); // Include socket in dependency array
 
   return (
     <main className="min-h-screen w-screen text-lg md:text-2xl bg-slate-950 text-gray-100 relative pb-40">
+      <input
+        type="text"
+        className="input input-bordered absolute left-1/2 text-black input-info max-w-lg mt-2 mx-auto"
+        placeholder="user id for specific messages.."
+        value={userId}
+        onChange={(e: any) => setUserId(e.target.value)}
+      />
       {messages.length > 0 && (
         <div className="md:w-[80vw] mx-auto w-[90vw] rounded p-8 bg-indigo-600 text-slate-200 mb:4 pt-8">
           {messages.map((msg, index) => (

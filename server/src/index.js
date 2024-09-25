@@ -19,7 +19,7 @@ const server = new createServer(app);
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
-    methods: ["GET", "PUT", "DELETE", "PATCH"],
+    methods: ["GET", "PUT"],
     credentials: true,
   },
 });
@@ -39,6 +39,10 @@ io.on("connection", (socket) => {
     // Emit the message to all clients, including the sender
     io.emit("messageReceiver", msg, socket.id); // Change socket.emit to io.emit
     console.log(msg, socket.id);
+  });
+
+  socket.on("receive-message", ({ message, socketId }) => {
+    io.to(socketId).emit("Message from : ", socketId, message);
   });
 });
 
